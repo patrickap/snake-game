@@ -103,8 +103,7 @@ class Snake {
   }
 
   update() {
-    const [head] = this.elements;
-    const { x, y } = head.getPosition();
+    const { x, y } = this.head.getPosition();
     const { x: speedX, y: speedY } = this.movement.acceleration;
     const newHead = new SnakeElement({ x: x + speedX, y: y + speedY });
     this.elements = [newHead, ...this.elements.slice(0, -1)];

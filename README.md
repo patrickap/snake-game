@@ -1,4 +1,4 @@
-# snake
+# snake-game
 
 Simple Snake Game using HTML5 Canvas. 🐍
 

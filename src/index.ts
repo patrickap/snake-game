@@ -36,8 +36,8 @@ const animate = () => {
       snakeHead.getPosition().y === CANVAS.HEIGHT;
 
     if (isFoodEaten) {
-      snake.addPart();
       food.move();
+      snake.addPart();
     }
 
     if (isCollidingSelf || isCollidingView) {

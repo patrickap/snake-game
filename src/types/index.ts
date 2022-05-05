@@ -1,12 +1,7 @@
 import { DIRECTION } from '../constants';
 
-type Point = { x: number; y: number };
+type Point2D = { x: number; y: number };
 
-type Direction = typeof DIRECTION[keyof typeof DIRECTION];
+type Direction2D = typeof DIRECTION[keyof typeof DIRECTION];
 
-type Movement = {
-  direction: Direction;
-  acceleration: Point;
-};
-
-export { Point, Direction, Movement };
+export { Point2D, Direction2D };

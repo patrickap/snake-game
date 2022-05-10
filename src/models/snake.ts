@@ -10,8 +10,24 @@ class Snake {
   constructor() {
     // TODO: unsubscribe on class destroy
     document.addEventListener('keydown', ({ keyCode }) => {
-      this.direction =
-        (DIRECTION[keyCode] as keyof typeof DIRECTION) ?? undefined;
+      switch (keyCode) {
+        case DIRECTION.ARROW_UP:
+          if (this.direction === DIRECTION.ARROW_DOWN) return;
+          this.direction = DIRECTION.ARROW_UP;
+          break;
+        case DIRECTION.ARROW_DOWN:
+          if (this.direction === DIRECTION.ARROW_UP) return;
+          this.direction = DIRECTION.ARROW_DOWN;
+          break;
+        case DIRECTION.ARROW_LEFT:
+          if (this.direction === DIRECTION.ARROW_RIGHT) return;
+          this.direction = DIRECTION.ARROW_LEFT;
+          break;
+        case DIRECTION.ARROW_RIGHT:
+          if (this.direction === DIRECTION.ARROW_LEFT) return;
+          this.direction = DIRECTION.ARROW_RIGHT;
+          break;
+      }
     });
   }
 
@@ -55,23 +71,24 @@ class Snake {
   }
 
   move() {
-    const newHead = new SnakePart(
-      this.getHead().getPosition(),
-      this.direction === DIRECTION[DIRECTION.ARROW_UP]
+    const position = this.getHead().getPosition();
+    const movement =
+      this.direction === DIRECTION.ARROW_UP
         ? { x: 0, y: -CANVAS.CELL_SIZE }
-        : this.direction === DIRECTION[DIRECTION.ARROW_DOWN]
+        : this.direction === DIRECTION.ARROW_DOWN
         ? { x: 0, y: CANVAS.CELL_SIZE }
-        : this.direction === DIRECTION[DIRECTION.ARROW_LEFT]
+        : this.direction === DIRECTION.ARROW_LEFT
         ? { x: -CANVAS.CELL_SIZE, y: 0 }
-        : this.direction === DIRECTION[DIRECTION.ARROW_RIGHT]
+        : this.direction === DIRECTION.ARROW_RIGHT
         ? { x: CANVAS.CELL_SIZE, y: 0 }
-        : { x: 0, y: 0 },
-      this.getHead().getColor(),
-    );
-    const newParts = this.parts.slice(0, -1);
+        : { x: 0, y: 0 };
 
-    newHead.move();
-    this.parts = [newHead, ...newParts];
+    const newHead = new SnakePart({
+      x: position.x + movement.x,
+      y: position.y + movement.y,
+    });
+
+    this.parts = [newHead, ...this.parts.slice(0, -1)];
   }
 
   draw() {

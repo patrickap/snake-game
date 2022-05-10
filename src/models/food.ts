@@ -1,3 +1,4 @@
+import { CANVAS } from '../constants';
 import { getRandomPoint } from '../utils';
 import { SnakePart } from './snake';
 
@@ -12,7 +13,7 @@ class Food {
     this.food = food;
   }
 
-  move() {
+  reset() {
     this.food = new FoodPart();
   }
 
@@ -25,8 +26,9 @@ class FoodPart extends SnakePart {
   constructor() {
     super(
       getRandomPoint({
-        offset: { x: -SnakePart.size.x, y: -SnakePart.size.y },
+        offset: { x: -CANVAS.CELL_SIZE, y: -CANVAS.CELL_SIZE },
       }),
+      { x: 0, y: 0 },
       'red',
     );
   }

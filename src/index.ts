@@ -4,48 +4,63 @@ import { Snake, Food } from './models';
 import { CANVAS } from './constants';
 import { isSamePoint } from './utils';
 
-let frame = 0;
-let snake = new Snake();
-let food = new Food();
+class Game {
+  private frame = 0;
+  private snake = new Snake();
+  private food = new Food();
 
-const animate = () => {
-  const is5thFrame = !(++frame % 5);
-  if (is5thFrame) {
-    ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT);
-    snake.move();
-    food.draw();
-    snake.draw();
-
-    const snakeHead = snake.getHead();
-    const snakeTail = snake.getTail();
-    const snakeFood = food.getFood();
-
-    const isFoodEaten = isSamePoint(
-      snakeHead.getPosition(),
-      snakeFood.getPosition(),
+  get isFoodEaten() {
+    return isSamePoint(
+      this.snake.getHead().getPosition(),
+      this.food.getFood().getPosition(),
     );
+  }
 
-    const isCollidingSelf = snakeTail.some((part) =>
-      isSamePoint(snakeHead.getPosition(), part.getPosition()),
-    );
+  get isCollidingSelf() {
+    return this.snake
+      .getTail()
+      .some((part) =>
+        isSamePoint(this.snake.getHead().getPosition(), part.getPosition()),
+      );
+  }
 
-    const isCollidingView =
+  get isCollidingView() {
+    const snakeHead = this.snake.getHead();
+    return (
       snakeHead.getPosition().x + CANVAS.CELL_SIZE === 0 ||
       snakeHead.getPosition().x === CANVAS.WIDTH ||
       snakeHead.getPosition().y + CANVAS.CELL_SIZE === 0 ||
-      snakeHead.getPosition().y === CANVAS.HEIGHT;
-
-    if (isFoodEaten) {
-      food.move();
-      snake.addPart();
-    }
-
-    if (isCollidingSelf || isCollidingView) {
-      snake = new Snake();
-      food = new Food();
-    }
+      snakeHead.getPosition().y === CANVAS.HEIGHT
+    );
   }
-  requestAnimationFrame(animate);
-};
 
-animate();
+  get is5thFrame() {
+    return !(++this.frame % 5);
+  }
+
+  animate() {
+    if (this.is5thFrame) {
+      ctx.clearRect(0, 0, CANVAS.WIDTH, CANVAS.HEIGHT);
+      this.snake.move();
+      this.food.draw();
+      this.snake.draw();
+
+      if (this.isFoodEaten) {
+        this.food.reset();
+        this.snake.addPart();
+      }
+
+      if (this.isCollidingSelf || this.isCollidingView) {
+        this.snake = new Snake();
+        this.food = new Food();
+      }
+    }
+    requestAnimationFrame(this.animate.bind(this));
+  }
+
+  run() {
+    this.animate();
+  }
+}
+
+new Game().run();

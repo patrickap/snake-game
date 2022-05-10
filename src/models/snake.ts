@@ -1,38 +1,17 @@
-import { CANVAS, DIRECTION, KEYCODE } from '../constants';
-import { ctx } from '../global';
+import { CANVAS, DIRECTION } from '../constants';
 import { Point2D, Direction2D } from '../types';
 import { getCenterPoint } from '../utils';
+import { Element } from './element';
 
 class Snake {
-  protected direction: Direction2D = DIRECTION.NONE;
-  protected movement: Point2D = { x: 0, y: 0 };
+  protected direction?: Direction2D = undefined;
   protected parts: SnakePart[] = [new SnakePart()];
 
   constructor() {
     // TODO: unsubscribe on class destroy
     document.addEventListener('keydown', ({ keyCode }) => {
-      switch (keyCode) {
-        case KEYCODE.ARROW_UP:
-          if (this.direction === DIRECTION.DOWN) return;
-          this.direction = DIRECTION.UP;
-          this.movement = { x: 0, y: -SnakePart.size.y };
-          break;
-        case KEYCODE.ARROW_DOWN:
-          if (this.direction === DIRECTION.UP) return;
-          this.direction = DIRECTION.DOWN;
-          this.movement = { x: 0, y: SnakePart.size.y };
-          break;
-        case KEYCODE.ARROW_LEFT:
-          if (this.direction === DIRECTION.RIGHT) return;
-          this.direction = DIRECTION.LEFT;
-          this.movement = { x: -SnakePart.size.x, y: 0 };
-          break;
-        case KEYCODE.ARROW_RIGHT:
-          if (this.direction === DIRECTION.LEFT) return;
-          this.direction = DIRECTION.RIGHT;
-          this.movement = { x: SnakePart.size.x, y: 0 };
-          break;
-      }
+      this.direction =
+        (DIRECTION[keyCode] as keyof typeof DIRECTION) ?? undefined;
     });
   }
 
@@ -40,16 +19,8 @@ class Snake {
     return this.direction;
   }
 
-  setDirectoin(direction: Direction2D) {
+  setDirection(direction: Direction2D) {
     this.direction = direction;
-  }
-
-  getMovement() {
-    return this.movement;
-  }
-
-  setMovement(movement: Point2D) {
-    this.movement = movement;
   }
 
   getParts() {
@@ -84,13 +55,23 @@ class Snake {
   }
 
   move() {
-    const { x: positionX, y: positionY } = this.getHead().getPosition();
-    const { x: movementX, y: movementY } = this.movement;
-    const newHead = new SnakePart({
-      x: positionX + movementX,
-      y: positionY + movementY,
-    });
-    this.parts = [newHead, ...this.parts.slice(0, -1)];
+    const newHead = new SnakePart(
+      this.getHead().getPosition(),
+      this.direction === DIRECTION[DIRECTION.ARROW_UP]
+        ? { x: 0, y: -CANVAS.CELL_SIZE }
+        : this.direction === DIRECTION[DIRECTION.ARROW_DOWN]
+        ? { x: 0, y: CANVAS.CELL_SIZE }
+        : this.direction === DIRECTION[DIRECTION.ARROW_LEFT]
+        ? { x: -CANVAS.CELL_SIZE, y: 0 }
+        : this.direction === DIRECTION[DIRECTION.ARROW_RIGHT]
+        ? { x: CANVAS.CELL_SIZE, y: 0 }
+        : { x: 0, y: 0 },
+      this.getHead().getColor(),
+    );
+    const newParts = this.parts.slice(0, -1);
+
+    newHead.move();
+    this.parts = [newHead, ...newParts];
   }
 
   draw() {
@@ -100,44 +81,21 @@ class Snake {
   }
 }
 
-class SnakePart {
+class SnakePart extends Element {
   constructor(
     protected position: Point2D = getCenterPoint({
-      offset: { x: -SnakePart.size.x, y: -SnakePart.size.y },
+      offset: { x: -CANVAS.CELL_SIZE, y: -CANVAS.CELL_SIZE },
     }),
+    protected movement: Point2D = { x: 0, y: 0 },
     protected color = 'black',
-  ) {}
-
-  static get size() {
-    return { x: CANVAS.CELL_SIZE, y: CANVAS.CELL_SIZE };
-  }
-
-  getPosition() {
-    return this.position;
-  }
-
-  setPosition(position: Point2D) {
-    this.position = position;
-  }
-
-  getColor() {
-    return this.color;
-  }
-
-  setColor(color: string) {
-    this.color = color;
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.fillStyle = this.color;
-    ctx.rect(
+  ) {
+    super(position, movement, color);
+    this.path.rect(
       this.position.x,
       this.position.y,
-      SnakePart.size.x,
-      SnakePart.size.y,
+      CANVAS.CELL_SIZE,
+      CANVAS.CELL_SIZE,
     );
-    ctx.fill();
   }
 }
 
